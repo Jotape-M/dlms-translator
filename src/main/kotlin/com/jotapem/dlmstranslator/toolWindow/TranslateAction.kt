@@ -15,17 +15,22 @@ class TranslateAction : AnAction() {
         val project = e.project ?: return
         val selectedText = editor.selectionModel.selectedText
 
-        // Puxamos o grupo de notificações que registámos no plugin.xml
         val notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup("DLMS Notifications")
 
         if (!selectedText.isNullOrBlank()) {
             val translation = DlmsTranslatorService.translate(selectedText)
 
-            // Padrão JetBrains: Notificação suave no canto inferior direito (INFO)
-            notificationGroup.createNotification(MyBundle.message("notification.translate.title"), translation, NotificationType.INFORMATION).notify(project)
+            notificationGroup.createNotification(
+                MyBundle.message("notification.translate.title"),
+                translation,
+                NotificationType.INFORMATION
+            ).notify(project)
         } else {
-            // Padrão JetBrains: Notificação de aviso (WARNING)
-            notificationGroup.createNotification("DLMS Translator", MyBundle.message("notification.noSelection.message"), NotificationType.WARNING).notify(project)
+            notificationGroup.createNotification(
+                "DLMS Translator",
+                MyBundle.message("notification.noSelection.message"),
+                NotificationType.WARNING
+            ).notify(project)
         }
     }
 }

@@ -24,13 +24,11 @@ object DlmsTranslatorService {
         }
     }
 
-    fun translateMessage(input: String, useHex: Boolean = true): String {
-        return processTranslation(input, useHex) { translator, bytes ->
-            translator.messageToXml(bytes)
-        }
-    }
-
-    private fun processTranslation(input: String, useHex: Boolean, translateFunc: (GXDLMSTranslator, ByteArray) -> String): String {
+    private fun processTranslation(
+        input: String,
+        useHex: Boolean,
+        translateFunc: (GXDLMSTranslator, ByteArray) -> String
+    ): String {
         val cleanInput = input.replace("\\s+".toRegex(), "")
 
         if (cleanInput.isBlank()) {
@@ -42,7 +40,6 @@ object DlmsTranslatorService {
             translator.setHex(useHex)
             val xmlResult = translateFunc(translator, bytes)
 
-            // Aqui passamos o resultado pela nossa nova função de formatação!
             formatXml(xmlResult)
 
         } catch (e: Exception) {
@@ -55,22 +52,17 @@ object DlmsTranslatorService {
      */
     private fun formatXml(xml: String): String {
         return try {
-            // 1. O SEGREDO: Esmagar o XML numa linha só.
-            // Substitui qualquer espaço/quebra de linha entre tags por apenas "><"
             val singleLineXml = xml.replace(">\\s+<".toRegex(), "><").trim()
 
-            // 2. Configurar o formatador
             val transformer = TransformerFactory.newInstance().newTransformer()
             transformer.setOutputProperty(OutputKeys.INDENT, "yes")
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4") // 4 espaços
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes")
 
-            // 3. Executar a formatação
             val result = StreamResult(StringWriter())
             val source = StreamSource(StringReader(singleLineXml))
             transformer.transform(source, result)
 
-            // 4. Limpeza final: por precaução, removemos linhas completamente vazias
             val finalXml = result.writer.toString().replace("(?m)^[ \t]*\r?\n".toRegex(), "")
 
             finalXml.trim()

@@ -34,15 +34,12 @@ class DlmsToolWindowFactory : ToolWindowFactory {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val contentFactory = ContentFactory.getInstance()
 
-        // Criamos apenas o painel de PDU
         val mainPanel = createTranslationPanel(
             project,
             MyBundle.message("input.pdu.emptyText"),
             MyBundle.message("button.translatePdu.text")
         ) { input, useHex -> DlmsTranslatorService.translate(input, useHex) }
 
-        // Registamos como o conteúdo único da janela.
-        // Como passamos "" (vazio) no título, o IntelliJ não vai criar a barra de abas!
         val content = contentFactory.createContent(mainPanel, "", false)
         toolWindow.contentManager.addContent(content)
     }
