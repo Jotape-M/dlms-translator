@@ -6,9 +6,7 @@
 
 - **PDU to XML Translation**: Converts DLMS PDUs into structured XML.
 - **Tool Window**: A dedicated interface on the right sidebar for manual input and XML visualization.
-- **Editor Quick Action**: Select any hexadecimal text in the editor and use the **Translate DLMS Code** action from the context menu.
 - **Automatic Formatting**: XML is generated with professional indentation for enhanced readability.
-- **Integrated Notifications**: Quick translation results displayed via IntelliJ system notifications.
 
 ## 🛠️ How to Use
 
@@ -17,11 +15,6 @@
 2. Paste the hexadecimal frame into the upper input field.
 3. Click the translation button.
 4. The formatted XML will be displayed in the lower area. You can copy the result using the copy icon in the output area's toolbar.
-
-### Using the Editor Context Menu
-1. In any open file, select the hexadecimal text you wish to translate.
-2. Right-click and select the **Translate DLMS Code** action.
-3. A notification will appear containing the translation result.
 
 ## 📦 Technologies and Dependencies
 
