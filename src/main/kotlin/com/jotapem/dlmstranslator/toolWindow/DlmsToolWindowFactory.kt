@@ -15,19 +15,20 @@ import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.*
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.JBPanel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.content.ContentFactory
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
+import com.intellij.openapi.ui.ComboBox
 import com.jotapem.dlmstranslator.MyBundle
 import com.jotapem.dlmstranslator.services.DlmsTranslatorService
 import java.awt.BorderLayout
+import java.awt.Component
 import java.awt.FlowLayout
 import java.awt.datatransfer.StringSelection
-import javax.swing.BorderFactory
-import javax.swing.JButton
-import javax.swing.JPanel
+import javax.swing.*
 
 class DlmsToolWindowFactory : ToolWindowFactory {
 
@@ -38,7 +39,7 @@ class DlmsToolWindowFactory : ToolWindowFactory {
             project,
             MyBundle.message("input.pdu.emptyText"),
             MyBundle.message("button.translatePdu.text")
-        ) { input, useHex -> DlmsTranslatorService.translate(input, useHex) }
+        ) { input, useHex, inputType -> DlmsTranslatorService.translate(input, useHex, inputType) }
 
         val content = contentFactory.createContent(mainPanel, "", false)
         toolWindow.contentManager.addContent(content)
@@ -48,9 +49,9 @@ class DlmsToolWindowFactory : ToolWindowFactory {
         project: Project,
         inputEmptyText: String,
         buttonText: String,
-        translateAction: (String, Boolean) -> String
-    ): JPanel {
-        val panel = JPanel(BorderLayout())
+        translateAction: (String, Boolean, DlmsTranslatorService.InputType) -> String
+    ): JBPanel<*> {
+        val panel = JBPanel<JBPanel<*>>(BorderLayout())
 
         // --- 1. ÁREA DE ENTRADA (HEXADECIMAL) ---
         val inputArea = JBTextArea().apply {
@@ -63,38 +64,48 @@ class DlmsToolWindowFactory : ToolWindowFactory {
 
         }
 
-        val inputHeader = JPanel(BorderLayout()).apply {
-            add(
-                JBLabel(MyBundle.message("input.header.label"), UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER),
-                BorderLayout.WEST
-            )
-
-            val clearAction = object : DumbAwareAction(
-                MyBundle.message("input.clear.text"),
-                MyBundle.message("input.clear.description"),
-                AllIcons.Actions.GC
-            ) {
-                override fun actionPerformed(e: AnActionEvent) {
-                    inputArea.text = ""
+        val inputTypeCombo = ComboBox(DlmsTranslatorService.InputType.entries.toTypedArray()).apply {
+            renderer = object : DefaultListCellRenderer() {
+                override fun getListCellRendererComponent(
+                    list: JList<*>?,
+                    value: Any?,
+                    index: Int,
+                    isSelected: Boolean,
+                    cellHasFocus: Boolean
+                ): Component {
+                    val label = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
+                    if (value is DlmsTranslatorService.InputType) {
+                        label.text = when (value) {
+                            DlmsTranslatorService.InputType.HEX -> MyBundle.message("options.inputType.hex")
+                            DlmsTranslatorService.InputType.BASE64 -> MyBundle.message("options.inputType.base64")
+                        }
+                    }
+                    return label
                 }
             }
-
-            val actionGroup = DefaultActionGroup().apply {
-                add(clearAction)
-            }
-
-            val toolbar = ActionManager.getInstance().createActionToolbar("DLMSInputToolbar", actionGroup, true).apply {
-                targetComponent = inputArea
-                component.isOpaque = false
-                component.border = JBUI.Borders.empty()
-            }
-            add(toolbar.component, BorderLayout.EAST)
         }
 
-        val inputContainer = JPanel(BorderLayout()).apply {
-            border = JBUI.Borders.empty(8, 12, 4, 12)
+        val inputHeader = JBPanel<JBPanel<*>>(BorderLayout()).apply {
+            border = JBUI.Borders.empty(0, 12, 4, 12)
+            val leftHeaderPanel = JBPanel<JBPanel<*>>(FlowLayout(FlowLayout.LEFT, 0, 0)).apply {
+                isOpaque = false
+                add(
+                    JBLabel(MyBundle.message("input.header.label"), UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
+                )
+                add(Box.createHorizontalStrut(8))
+                add(inputTypeCombo)
+            }
+            add(leftHeaderPanel, BorderLayout.WEST)
+        }
+
+        val inputContainer = JBPanel<JBPanel<*>>(BorderLayout()).apply {
+            border = JBUI.Borders.empty(8, 0, 4, 0)
             add(inputHeader, BorderLayout.NORTH)
-            add(JBScrollPane(inputArea), BorderLayout.CENTER)
+            val scrollPaneContainer = JBPanel<JBPanel<*>>(BorderLayout()).apply {
+                border = JBUI.Borders.empty(0, 12)
+                add(JBScrollPane(inputArea), BorderLayout.CENTER)
+            }
+            add(scrollPaneContainer, BorderLayout.CENTER)
         }
 
         // --- 2. ÁREA DE SAÍDA (XML) ---
@@ -110,8 +121,8 @@ class DlmsToolWindowFactory : ToolWindowFactory {
             }
         }
 
-        val outputHeader = JPanel(BorderLayout()).apply {
-            border = JBUI.Borders.empty(4, 0)
+        val outputHeader = JBPanel<JBPanel<*>>(BorderLayout()).apply {
+            border = JBUI.Borders.empty(4, 12)
             add(
                 JBLabel(
                     MyBundle.message("output.header.label"),
@@ -146,51 +157,68 @@ class DlmsToolWindowFactory : ToolWindowFactory {
             add(toolbar.component, BorderLayout.EAST)
         }
 
-        val outputContainer = JPanel(BorderLayout()).apply {
-            border = BorderFactory.createCompoundBorder(
+        val outputContainer = JBPanel<JBPanel<*>>(BorderLayout()).apply {
+            border = JBUI.Borders.merge(
                 IdeBorderFactory.createBorder(SideBorder.TOP),
-                JBUI.Borders.empty(4, 12, 8, 12)
+                JBUI.Borders.empty(4, 0, 8, 0),
+                true
             )
             add(outputHeader, BorderLayout.NORTH)
-            add(outputArea, BorderLayout.CENTER)
+            val outputAreaContainer = JBPanel<JBPanel<*>>(BorderLayout()).apply {
+                border = JBUI.Borders.empty(0, 12)
+                add(outputArea, BorderLayout.CENTER)
+            }
+            add(outputAreaContainer, BorderLayout.CENTER)
         }
 
         // --- 3. DIVISOR CENTRAL ---
         val splitter = JBSplitter(true).apply {
             firstComponent = inputContainer
             secondComponent = outputContainer
+            dividerWidth = 1
+            border = JBUI.Borders.empty()
         }
 
-        // --- 4. BARRA INFERIOR DE BOTÕES ---
         val hexCheckBox = JBCheckBox(MyBundle.message("options.showHex.text"), true)
+
+        fun performTranslation() {
+            if (inputArea.text.isNotBlank()) {
+                val inputType = inputTypeCombo.selectedItem as DlmsTranslatorService.InputType
+                val result = translateAction(inputArea.text, hexCheckBox.isSelected, inputType)
+                outputArea.text = result
+            }
+        }
 
         val translateBtn = JButton(buttonText).apply {
             putClientProperty("JButton.buttonType", "defaultButton")
             icon = AllIcons.Actions.Compile
 
             addActionListener {
-                if (inputArea.text.isNotBlank()) {
-                    val result = translateAction(inputArea.text, hexCheckBox.isSelected)
-                    outputArea.text = result
+                performTranslation()
+            }
+        }
+
+        hexCheckBox.addActionListener { performTranslation() }
+        inputTypeCombo.addActionListener { performTranslation() }
+
+        val bottomPanel = JBPanel<JBPanel<*>>(BorderLayout()).apply {
+            border = JBUI.Borders.empty(4, 0)
+
+            val innerPanel = JBPanel<JBPanel<*>>(BorderLayout()).apply {
+                border = JBUI.Borders.empty(0, 10)
+                val leftPanel = JBPanel<JBPanel<*>>(FlowLayout(FlowLayout.LEFT, 0, 0)).apply {
+                    add(translateBtn)
+                    add(Box.createHorizontalStrut(8))
+                    add(hexCheckBox)
                 }
-            }
-        }
 
-        hexCheckBox.addActionListener {
-            if (inputArea.text.isNotBlank()) {
-                val result = translateAction(inputArea.text, hexCheckBox.isSelected)
-                outputArea.text = result
-            }
-        }
+                val rightPanel = JBPanel<JBPanel<*>>(FlowLayout(FlowLayout.RIGHT, 0, 0)).apply {
+                }
 
-        val bottomPanel = JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply {
-            border = BorderFactory.createCompoundBorder(
-                IdeBorderFactory.createBorder(SideBorder.TOP),
-                JBUI.Borders.empty(10)
-            )
-            add(translateBtn)
-            add(javax.swing.Box.createHorizontalStrut(12))
-            add(hexCheckBox)
+                add(leftPanel, BorderLayout.WEST)
+                add(rightPanel, BorderLayout.EAST)
+            }
+            add(innerPanel, BorderLayout.CENTER)
         }
 
         panel.add(splitter, BorderLayout.CENTER)

@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.jotapem"
-version = "1.0-SNAPSHOT"
+version = "1.1.0"
 
 repositories {
     mavenCentral()
@@ -35,7 +35,13 @@ intellijPlatform {
         }
 
         changeNotes = """
-            Initial version
+            <h3>1.1.0</h3>
+            <ul>
+                <li>Added Base64 input support alongside hexadecimal input</li>
+                <li>Added input type selector dropdown (Hex/Base64) in the UI</li>
+                <li>Improved error messages and validation</li>
+                <li>UI refinements and layout improvements</li>
+            </ul>
         """.trimIndent()
     }
 }

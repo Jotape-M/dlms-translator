@@ -7,12 +7,12 @@
 
     <description><![CDATA[
         <p><b>DLMS Translator</b> is an essential tool for developers and engineers working with Smart Meters and the DLMS/COSEM protocol.</p>
-        <p>This plugin allows you to instantly translate DLMS hexadecimal frames directly inside your IDE into a clean, formatted, and readable XML structure, saving you time from using external tools.</p>
+        <p>This plugin allows you to instantly translate DLMS frames (hexadecimal or Base64) directly inside your IDE into a clean, formatted, and readable XML structure, saving you time from using external tools.</p>
         <br/>
         <b>Key Features:</b>
         <ul>
             <li><b>PDU Translation:</b> Decode Protocol Data Units (AARQ, AARE, get-request, etc.) seamlessly.</li>
-            <li><b>Hex to XML:</b> Automatically converts and formats hex strings into syntax-highlighted XML.</li>
+            <li><b>Multiple Input Formats:</b> Supports both hexadecimal and Base64 encoded DLMS frames.</li>
             <li><b>Native UI:</b> A beautifully integrated Tool Window that respects your IDE's Dark/Light themes and font settings.</li>
         </ul>
         <br/>
