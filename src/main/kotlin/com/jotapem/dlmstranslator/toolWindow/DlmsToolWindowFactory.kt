@@ -118,6 +118,9 @@ class DlmsToolWindowFactory : ToolWindowFactory {
                 editor.setBorder(BorderFactory.createLineBorder(JBColor.border(), 1, true))
                 editor.settings.isLineNumbersShown = true
                 editor.settings.isFoldingOutlineShown = true
+                editor.setVerticalScrollbarVisible(true)
+                editor.setHorizontalScrollbarVisible(true)
+                editor.settings.isUseSoftWraps = false
             }
         }
 

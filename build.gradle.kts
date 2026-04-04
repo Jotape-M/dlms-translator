@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.jotapem"
-version = "1.1.0"
+version = "1.1.1"
 
 repositories {
     mavenCentral()
@@ -35,6 +35,10 @@ intellijPlatform {
         }
 
         changeNotes = """
+            <h3>1.1.1</h3>
+            <ul>
+                <li>Added scrolling support in the XML output area (vertical and horizontal)</li>
+            </ul>
             <h3>1.1.0</h3>
             <ul>
                 <li>Added Base64 input support alongside hexadecimal input</li>
