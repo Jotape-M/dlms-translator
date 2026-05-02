@@ -9,7 +9,7 @@ This file provides guidance for AI agents (e.g. Claude, Copilot, Cursor) working
 **DLMS Translator** is an IntelliJ IDEA plugin that translates DLMS/COSEM protocol frames (hexadecimal or Base64) into formatted, readable XML — directly inside the IDE, without external tools.
 
 - **Plugin ID:** `com.jotapem.dlms-translator`
-- **Current version:** `1.2.0`
+- **Current version:** `1.2.1`
 - **Language:** Kotlin (JVM 21)
 - **Build system:** Gradle with IntelliJ Platform Gradle Plugin `2.10.2`
 - **Target IDE:** IntelliJ IDEA `2025.2.4+` (since build `252.25557`)

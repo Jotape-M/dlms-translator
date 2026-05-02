@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.jotapem"
-version = "1.2.0"
+version = "1.2.1"
 
 repositories {
     mavenCentral()
@@ -37,6 +37,10 @@ intellijPlatform {
         }
 
         changeNotes = """
+            <h3>1.2.1</h3>
+            <ul>
+                <li>Removed Portuguese (PT-BR) translation</li>
+            </ul>
             <h3>1.2.0</h3>
             <ul>
                 <li>Added "Translate DLMS Frame" editor context menu action</li>
