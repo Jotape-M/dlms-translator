@@ -4,12 +4,14 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.EditorFontType
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.*
@@ -21,8 +23,8 @@ import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.content.ContentFactory
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
-import com.intellij.openapi.ui.ComboBox
 import com.jotapem.dlmstranslator.MyBundle
+import com.jotapem.dlmstranslator.services.DlmsToolWindowController
 import com.jotapem.dlmstranslator.services.DlmsTranslatorService
 import java.awt.BorderLayout
 import java.awt.Component
@@ -32,16 +34,29 @@ import javax.swing.*
 
 class DlmsToolWindowFactory : ToolWindowFactory {
 
+    private data class PanelResult(
+        val component: JBPanel<*>,
+        val inputArea: JBTextArea,
+        val inputTypeCombo: ComboBox<DlmsTranslatorService.InputType>,
+        val performTranslation: () -> Unit
+    )
+
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val contentFactory = ContentFactory.getInstance()
 
-        val mainPanel = createTranslationPanel(
+        val result = createTranslationPanel(
             project,
             MyBundle.message("input.pdu.emptyText"),
             MyBundle.message("button.translatePdu.text")
         ) { input, useHex, inputType -> DlmsTranslatorService.translate(input, useHex, inputType) }
 
-        val content = contentFactory.createContent(mainPanel, "", false)
+        project.service<DlmsToolWindowController>().apply {
+            inputArea = result.inputArea
+            inputTypeCombo = result.inputTypeCombo
+            performTranslation = result.performTranslation
+        }
+
+        val content = contentFactory.createContent(result.component, "", false)
         toolWindow.contentManager.addContent(content)
     }
 
@@ -50,7 +65,7 @@ class DlmsToolWindowFactory : ToolWindowFactory {
         inputEmptyText: String,
         buttonText: String,
         translateAction: (String, Boolean, DlmsTranslatorService.InputType) -> String
-    ): JBPanel<*> {
+    ): PanelResult {
         val panel = JBPanel<JBPanel<*>>(BorderLayout())
 
         // --- 1. ÁREA DE ENTRADA (HEXADECIMAL) ---
@@ -184,7 +199,7 @@ class DlmsToolWindowFactory : ToolWindowFactory {
 
         val hexCheckBox = JBCheckBox(MyBundle.message("options.showHex.text"), true)
 
-        fun performTranslation() {
+        val performTranslation: () -> Unit = {
             if (inputArea.text.isNotBlank()) {
                 val inputType = inputTypeCombo.selectedItem as DlmsTranslatorService.InputType
                 val result = translateAction(inputArea.text, hexCheckBox.isSelected, inputType)
@@ -227,6 +242,6 @@ class DlmsToolWindowFactory : ToolWindowFactory {
         panel.add(splitter, BorderLayout.CENTER)
         panel.add(bottomPanel, BorderLayout.SOUTH)
 
-        return panel
+        return PanelResult(panel, inputArea, inputTypeCombo, performTranslation)
     }
 }

@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.jotapem"
-version = "1.1.1"
+version = "1.2.0"
 
 repositories {
     mavenCentral()
@@ -26,6 +26,8 @@ dependencies {
     }
 
     implementation("org.gurux:gurux.dlms:4.0.85")
+
+    testImplementation("junit:junit:4.13.2")
 }
 
 intellijPlatform {
@@ -35,6 +37,13 @@ intellijPlatform {
         }
 
         changeNotes = """
+            <h3>1.2.0</h3>
+            <ul>
+                <li>Added "Translate DLMS Frame" editor context menu action</li>
+                <li>Select any hex frame in an editor, right-click, and translate it instantly</li>
+                <li>Automatic normalization of common log formats (TX:/RX: prefixes, 0x prefixes, various separators)</li>
+                <li>Clear IDE notifications for invalid or empty selections</li>
+            </ul>
             <h3>1.1.1</h3>
             <ul>
                 <li>Added scrolling support in the XML output area (vertical and horizontal)</li>

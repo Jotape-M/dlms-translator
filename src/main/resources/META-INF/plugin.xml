@@ -13,6 +13,7 @@
         <ul>
             <li><b>PDU Translation:</b> Decode Protocol Data Units (AARQ, AARE, get-request, etc.) seamlessly.</li>
             <li><b>Multiple Input Formats:</b> Supports both hexadecimal and Base64 encoded DLMS frames.</li>
+            <li><b>Editor Integration:</b> Select a hex frame in any editor, right-click, and translate it instantly.</li>
             <li><b>Native UI:</b> A beautifully integrated Tool Window that respects your IDE's Dark/Light themes and font settings.</li>
         </ul>
         <br/>
@@ -28,5 +29,18 @@
                     factoryClass="com.jotapem.dlmstranslator.toolWindow.DlmsToolWindowFactory"/>
 
         <iconMapper mappingFile="DlmsTranslatorIconMappings.json"/>
+
+        <projectService serviceImplementation="com.jotapem.dlmstranslator.services.DlmsToolWindowController"/>
+
+        <notificationGroup id="DLMS Translator Notifications" displayType="BALLOON"/>
     </extensions>
+
+    <actions>
+        <action id="com.jotapem.dlmstranslator.TranslateDlmsFrameAction"
+                class="com.jotapem.dlmstranslator.actions.TranslateDlmsFrameAction"
+                text="Translate DLMS Frame"
+                description="Translate the selected DLMS frame in the DLMS Translator tool window">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+    </actions>
 </idea-plugin>
