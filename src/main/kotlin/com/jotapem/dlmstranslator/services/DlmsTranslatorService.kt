@@ -19,12 +19,24 @@ object DlmsTranslatorService {
         BASE64
     }
 
+    sealed class TranslationResult {
+        data class Success(val xml: String) : TranslationResult()
+        data class Error(val message: String) : TranslationResult()
+    }
+
     private val translator = GXDLMSTranslator(TranslatorOutputType.SIMPLE_XML).apply {
         setComments(true)
         setHex(true)
     }
 
     fun translate(input: String, useHex: Boolean = true, inputType: InputType = InputType.HEX): String {
+        return when (val result = translateToResult(input, useHex, inputType)) {
+            is TranslationResult.Success -> result.xml
+            is TranslationResult.Error -> result.message
+        }
+    }
+
+    fun translateToResult(input: String, useHex: Boolean = true, inputType: InputType = InputType.HEX): TranslationResult {
         return processTranslation(input, useHex, inputType) { translator, bytes ->
             translator.pduToXml(bytes)
         }
@@ -35,11 +47,11 @@ object DlmsTranslatorService {
         useHex: Boolean,
         inputType: InputType,
         translateFunc: (GXDLMSTranslator, ByteArray) -> String
-    ): String {
+    ): TranslationResult {
         val cleanInput = input.replace("\\s+".toRegex(), "")
 
         if (cleanInput.isBlank()) {
-            return MyBundle.message("error.noInput")
+            return TranslationResult.Error(MyBundle.message("error.noInput"))
         }
 
         return try {
@@ -48,16 +60,16 @@ object DlmsTranslatorService {
                 InputType.BASE64 -> try {
                     Base64.getDecoder().decode(cleanInput)
                 } catch (_: IllegalArgumentException) {
-                    return MyBundle.message("error.invalidBase64")
+                    return TranslationResult.Error(MyBundle.message("error.invalidBase64"))
                 }
             }
             translator.setHex(useHex)
             val xmlResult = translateFunc(translator, bytes)
 
-            formatXml(xmlResult)
+            TranslationResult.Success(formatXml(xmlResult))
 
         } catch (e: Exception) {
-            MyBundle.message("error.invalidFrame", e.message ?: "")
+            TranslationResult.Error(MyBundle.message("error.invalidFrame", e.message ?: ""))
         }
     }
 

@@ -31,6 +31,7 @@
         <iconMapper mappingFile="DlmsTranslatorIconMappings.json"/>
 
         <projectService serviceImplementation="com.jotapem.dlmstranslator.services.DlmsToolWindowController"/>
+        <projectService serviceImplementation="com.jotapem.dlmstranslator.services.TranslationHistoryManager"/>
 
         <notificationGroup id="DLMS Translator Notifications" displayType="BALLOON"/>
     </extensions>
