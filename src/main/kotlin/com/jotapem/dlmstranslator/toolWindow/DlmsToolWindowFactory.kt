@@ -78,6 +78,7 @@ class DlmsToolWindowFactory : ToolWindowFactory {
         val showingHistory = booleanArrayOf(false)
 
         val historyPanel = createHistoryPanel(
+            project = project,
             historyManager = historyManager,
             historyListModel = historyListModel,
             inputArea = result.inputArea,
@@ -284,8 +285,9 @@ class DlmsToolWindowFactory : ToolWindowFactory {
             }
         }
 
-        hexCheckBox.addActionListener { performTranslation() }
-        inputTypeCombo.addActionListener { performTranslation() }
+        val controller = project.service<DlmsToolWindowController>()
+        hexCheckBox.addActionListener { if (!controller.suppressAutoTranslation) performTranslation() }
+        inputTypeCombo.addActionListener { if (!controller.suppressAutoTranslation) performTranslation() }
 
         val bottomPanel = JBPanel<JBPanel<*>>(BorderLayout()).apply {
             border = JBUI.Borders.empty(4, 0)
@@ -313,6 +315,7 @@ class DlmsToolWindowFactory : ToolWindowFactory {
     }
 
     private fun createHistoryPanel(
+        project: Project,
         historyManager: TranslationHistoryManager,
         historyListModel: DefaultListModel<TranslationHistoryEntry>,
         inputArea: JBTextArea,
@@ -356,9 +359,12 @@ class DlmsToolWindowFactory : ToolWindowFactory {
 
                 if (SwingUtilities.isLeftMouseButton(e)) {
                     val entry = historyListModel.getElementAt(index)
+                    val controller = project.service<DlmsToolWindowController>()
+                    controller.suppressAutoTranslation = true
                     inputArea.text = entry.input
                     inputTypeCombo.selectedItem = entry.inputType
                     outputArea.text = entry.output
+                    controller.suppressAutoTranslation = false
                     onLoad()
                 } else if (SwingUtilities.isRightMouseButton(e)) {
                     historyList.selectedIndex = index

@@ -9,10 +9,13 @@ class DlmsToolWindowController {
     var inputArea: JBTextArea? = null
     var inputTypeCombo: ComboBox<DlmsTranslatorService.InputType>? = null
     var performTranslation: (() -> Unit)? = null
+    var suppressAutoTranslation: Boolean = false
 
     fun translateInputFromEditor(frame: String) {
+        suppressAutoTranslation = true
         inputArea?.text = frame
         inputTypeCombo?.selectedItem = DlmsTranslatorService.InputType.HEX
+        suppressAutoTranslation = false
         performTranslation?.invoke()
     }
 }
