@@ -39,3 +39,7 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+# Plugin Signing Keys
+private.key
+certificate.crt
