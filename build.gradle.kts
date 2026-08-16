@@ -1,7 +1,8 @@
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm") version "2.1.20"
-    id("org.jetbrains.intellij.platform") version "2.10.2"
+    id("org.jetbrains.intellij.platform") version "2.18.1"
+    id("org.jetbrains.changelog") version "2.2.1"
 }
 
 group = "com.jotapem"
@@ -12,6 +13,11 @@ repositories {
     intellijPlatform {
         defaultRepositories()
     }
+}
+
+changelog {
+    groups.empty()
+    repositoryUrl = "https://github.com/Jotape-M/dlms-translator"
 }
 
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html
@@ -36,30 +42,29 @@ intellijPlatform {
             sinceBuild = "252.25557"
         }
 
-        changeNotes = """
-            <h3>1.2.1</h3>
-            <ul>
-                <li>Removed Portuguese (PT-BR) translation</li>
-            </ul>
-            <h3>1.2.0</h3>
-            <ul>
-                <li>Added "Translate DLMS Frame" editor context menu action</li>
-                <li>Select any hex frame in an editor, right-click, and translate it instantly</li>
-                <li>Automatic normalization of common log formats (TX:/RX: prefixes, 0x prefixes, various separators)</li>
-                <li>Clear IDE notifications for invalid or empty selections</li>
-            </ul>
-            <h3>1.1.1</h3>
-            <ul>
-                <li>Added scrolling support in the XML output area (vertical and horizontal)</li>
-            </ul>
-            <h3>1.1.0</h3>
-            <ul>
-                <li>Added Base64 input support alongside hexadecimal input</li>
-                <li>Added input type selector dropdown (Hex/Base64) in the UI</li>
-                <li>Improved error messages and validation</li>
-                <li>UI refinements and layout improvements</li>
-            </ul>
-        """.trimIndent()
+        changeNotes = provider {
+            changelog.renderItem(
+                changelog.getOrNull(project.version.toString()) ?: changelog.getUnreleased(),
+                org.jetbrains.changelog.Changelog.OutputType.HTML
+            )
+        }
+    }
+
+    signing {
+        certificateChain = providers.environmentVariable("CERTIFICATE_CHAIN")
+        privateKey = providers.environmentVariable("PRIVATE_KEY")
+        password = providers.environmentVariable("PRIVATE_KEY_PASSWORD")
+    }
+
+    publishing {
+        token = providers.environmentVariable("PUBLISH_TOKEN")
+        channels = listOf("default")
+    }
+
+    pluginVerification {
+        ides {
+            recommended()
+        }
     }
 }
 
